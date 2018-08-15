@@ -119,6 +119,10 @@
         window.open('tutorial.html').focus();
     }
 
+    function gotoFsmGuide () {
+        window.open('tutorial3.html').focus();
+    }
+
     function loadJSON () {
 
         function chooseFile(name) {
@@ -299,6 +303,7 @@
     WaveDrom.editorState = editorState;
     WaveDrom.setFullURL = setFullURL;
     WaveDrom.gotoWaveDromGuide = gotoWaveDromGuide;
+    WaveDrom.gotoFsmGuide = gotoFsmGuide;
     WaveDrom.gotoWaveDromHome = gotoWaveDromHome;
 
 })();

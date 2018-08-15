@@ -37,41 +37,41 @@
         The element <span class="fixed">coord</span> is automatically created by interacting with the graphical output (dragging the viewport, states etc.).
 
         <pre id="StateDromSyntax" class="brush: js">
-        {
-          fsm: [
-            { state: '0',								next: [{ state: 'one', cond: 'start', color: 'darkred' }] },
-            { state: 'one',   def: 'STYLE_01',			next: [{ state: 'two',  def: 'TRDEF',  cond: 'm:fs(30){ult}i\nline\n:fs(12){wi}th :fs(23){\'\\n\'}' }] },
-            { state: 'two',	  action: 'colored state',	next: [{ state: ['three', 'four'],	   cond: ['colored\nY-transition', 'to three', 'to :bf{four}'], color: 'orange',  def: 'ACTION' }] },
-            { state: 'three',							next: [{ cond: 'self-transition\n(omit \'state\' in \'next\')' }, { state: 'two', cond: 'drag transition text', textcolor: 'red' }] },
-            { state: 'four',  name: ':bf{four}', def: ['STYLE_06'] }
-          ],
-          def: {
-            0:		  { color: 'darkred',  textstyle: 'bf' },
-            one:	  { color: 'violet',   		name: 'nameoverride', textcolor: 'white',     action: 'italic :it{state action}' },
-            two:	  { fill: 'lightblue', namecolor: 'blue', actcolor: 'rgb(64,128,255)', linecolor: 'darkblue' },
-            four:	  { actionstyle: 'it' },
-            'Note 7': { fill: 'pink',	    textcolor: 'darkred' },
-            TRDEF:	  { condcolor: '#AABC56',  action: 'transition\n:fs(20){action}', actcolor: 'rgb(155,20,30)', linecolor: 'pink' },
-            STYLE_01: { textstyle: ['bf'],		 fill: 'darkred' },
-            STYLE_06: { namestyle: ['fs(60)'], action: 'italic def action', fill: 'green', linecolor: 'lightgreen', textcolor: 'lightgreen' },
-            ACTION:	  {  actstyle: 'bf',	   action: [, 'bold def action'] }
-          },
-          notes: [
-            { id: 'Note',	text: 'Drag a note\'s body.\nOr drag the tip to move whole note.\nOr click it to make the tip handle appear\nto change the tip\'s position only.', fill: 'rgb(255,222,222)' },
-            { id: 'Note 2', text: 'Drag the background to change the viewport.' },
-            { id: 'Note 3', text: 'Drag a state.', fill: 'lightblue' },
-            { id: 'Note 4', text: 'Click a state to show all bezier handles\nof neighboring transitions.',  fill: 'lightgreen', textcolor: 'darkgreen' },
-            { id: 'Note 5', text: 'Click a transition to show all\nbezier handles of this transitions.',    fill: 'violet' },
-            { id: 'Note 6', text: 'Text can be :bf{bold},\n:it{italic},\nand/or changed in :fs(20){size}.', fill: 'rgb(255,96,64)' },
-            { id: 'Note 7', text: 'Properties for states, transitions and notes can be outsourced to the :it{def} object.\nThe :it{def} property can be omitted for states and notes as the reference is also to the :it{state} and :it{id} property respectively.' }
-          ],
-          coord: {
-            offset: [-280,-40],
-            states: [['0',-150,90],['one',150,100],['two',600,150],['three',150,300],['four',-50,310]],
-            transitions: [['0','one',-102,155,-10,162,0,0],['one','two',367,2,483,43,-35,-2],['two','three','four',624,243,438,332,360,357,542,299,337,289,185,390,57,21,-28,-14,-67,25],['three','three',58,247,142,199,3,-38],['three','two',332,237,325,91,-73,-20]],
-            notes: [['Note',-116,202,-188,22],['Note 2',-106,-8,-94,7],['Note 3',150,26,150,63],['Note 4',598,19,601,106],['Note 5',600,365,477,326],['Note 6',444,236,438,233],['Note 7',117,425,107,425]]
-          }
-        }
+{
+  fsm: [
+    { state: '0',								next: [{ state: 'one', cond: 'start', color: 'darkred' }] },
+    { state: 'one',   def: 'STYLE_01',			next: [{ state: 'two',  def: 'TRDEF',  cond: 'm:fs(30){ult}i\nline\n:fs(12){wi}th :fs(23){\'\\n\'}' }] },
+    { state: 'two',	  action: 'colored state',	next: [{ state: ['three', 'four'],	   cond: ['colored\nY-transition', 'to three', 'to :bf{four}'], color: 'orange',  def: 'ACTION' }] },
+    { state: 'three',							next: [{ cond: 'self-transition\n(omit \'state\' in \'next\')' }, { state: 'two', cond: 'drag transition text', textcolor: 'red' }] },
+    { state: 'four',  name: ':bf{four}', def: ['STYLE_06'] }
+  ],
+  def: {
+    0:		  { color: 'darkred',  textstyle: 'bf' },
+    one:	  { color: 'violet',   		name: 'nameoverride', textcolor: 'white',     action: 'italic :it{state action}' },
+    two:	  { fill: 'lightblue', namecolor: 'blue', actcolor: 'rgb(64,128,255)', linecolor: 'darkblue' },
+    four:	  { actionstyle: 'it' },
+    'Note 7': { fill: 'pink',	    textcolor: 'darkred' },
+    TRDEF:	  { condcolor: '#AABC56',  action: 'transition\n:fs(20){action}', actcolor: 'rgb(155,20,30)', linecolor: 'pink' },
+    STYLE_01: { textstyle: ['bf'],		 fill: 'darkred' },
+    STYLE_06: { namestyle: ['fs(60)'], action: 'italic def action', fill: 'green', linecolor: 'lightgreen', textcolor: 'lightgreen' },
+    ACTION:	  {  actstyle: 'bf',	   action: [, 'bold def action'] }
+  },
+  notes: [
+    { id: 'Note',	text: 'Drag a note\'s body.\nOr drag the tip to move whole note.\nOr click it to make the tip handle appear\nto change the tip\'s position only.', fill: 'rgb(255,222,222)' },
+    { id: 'Note 2', text: 'Drag the background to change the viewport.' },
+    { id: 'Note 3', text: 'Drag a state.', fill: 'lightblue' },
+    { id: 'Note 4', text: 'Click a state to show all bezier handles\nof neighboring transitions.',  fill: 'lightgreen', textcolor: 'darkgreen' },
+    { id: 'Note 5', text: 'Click a transition to show all\nbezier handles of this transitions.',    fill: 'violet' },
+    { id: 'Note 6', text: 'Text can be :bf{bold},\n:it{italic},\nand/or changed in :fs(20){size}.', fill: 'rgb(255,96,64)' },
+    { id: 'Note 7', text: 'Properties for states, transitions and notes can be outsourced to the :it{def} object.\nThe :it{def} property can be omitted for states and notes as the reference is also to the :it{state} and :it{id} property respectively.' }
+  ],
+  coord: {
+    offset: [-280,-40],
+    states: [['0',-150,90],['one',150,100],['two',600,150],['three',150,300],['four',-50,310]],
+    transitions: [['0','one',-102,155,-10,162,0,0],['one','two',367,2,483,43,-35,-2],['two','three','four',624,243,438,332,360,357,542,299,337,289,185,390,57,21,-28,-14,-67,25],['three','three',58,247,142,199,3,-38],['three','two',332,237,325,91,-73,-20]],
+    notes: [['Note',-116,202,-188,22],['Note 2',-106,-8,-94,7],['Note 3',150,26,150,63],['Note 4',598,19,601,106],['Note 5',600,365,477,326],['Note 6',444,236,438,233],['Note 7',117,425,107,425]]
+  }
+}
         </pre>
 
         Following example is the output of above code and describes every possible interaction with the output itself:
