@@ -877,12 +877,12 @@ function createDataCont(source)
                                     ]
                             };
     
-    var states = [];
-    var transitions = [];
-    var tmp = { tid:0 };
-    var notes = [];
-    var coord = {};
-    var customProps = source.def;
+    var states = [],
+        transitions = [],
+        tmp = { tid:0 },
+        notes = [],
+        coord = {},
+        customProps = source.def;
     
     for (var state_i = 0; state_i < source.fsm.length; state_i++)
     {
@@ -935,7 +935,15 @@ function createDataCont(source)
         }
     }
     
-    if (source.coord) coord = source.coord;
+    if (source.coord)
+    {
+        coord = source.coord;
+        coord.found = true;
+    }
+    else
+    {
+        coord.found = false;
+    }
     
     return { 'states':states, 'transitions':transitions, 'notes':notes, 'coordinates':coord };
 }
@@ -1245,17 +1253,6 @@ var jsonmlParse = require('./create-element'),
     fsmGrid = require('./fsm-gen-grid'),
 	fsmJsonUpdate = require('./fsm-json-update');
     
-function isEmpty(obj)
-{
-    for(var prop in obj)
-    {
-        if (obj.hasOwnProperty(prop))
-            return false;
-    }
-
-    return JSON.stringify(obj) === JSON.stringify({});
-}
-
 function getCoordOnGrid(gw, x, y)
 {
     var nx, ny;
@@ -1298,7 +1295,7 @@ function insertSVGTemplateFsm (index, parent, dc)
     
     function dragEndSVG(d)
     {
-        fsmJsonUpdate(index, parent, !isEmpty(dc.coordinates));
+        fsmJsonUpdate(index, parent, dc);
     }
     
     var node,
@@ -2098,41 +2095,39 @@ function createCoordStr(index, parent)
     return coordstr;
 }
 
-function updateSourceCoord(index, parent, coordExists)
+function updateSourceCoord(index, parent, dc)
 {
     var str,
 		fsmloc,
 		coordloc,
         input,
-		win = d3.window(parent);//getWin('txt');
+		win = d3.window(parent);
         
     input = win.document.getElementById('InputJSON_' + index);
 	
-    // if (wintxt && wintxt.WaveDrom.cm)
+    str = input.value;
+    
+    if (dc.coordinates.found)
     {
-        str = input.value;//wintxt.WaveDrom.cm.getValue();
-        
-        if (coordExists)
-        {
-            coordloc = jsonEdit.getRangeInJsonString(str, /\s*,?\s*['"]?coord['"]?\s*:/g, 1, 0, 'obj');
-            str = jsonEdit.deleteElementFromJsonString(str, coordloc.beginIndex, coordloc.endIndex);
-            str = jsonEdit.insertElementInJsonString(str, coordloc.beginIndex, createCoordStr(index, parent));
-        }
-        else
-        {
-            fsmloc = jsonEdit.getRangeInJsonString(str, /\s*,?\s*['"]?fsm['"]?\s*:/g, 1, 0, 'arr');
-            str = jsonEdit.insertElementInJsonString(str, fsmloc.endIndex + 1, createCoordStr(index, parent));
-        }
-        
-		input.value = str;
-        localStorage.waveform = str;
-        
-        if (win.WaveDrom && win.WaveDrom.cm && win.WaveDrom.cmChangeFunction)
-        {
-            win.WaveDrom.cm.off('change', win.WaveDrom.cmChangeFunction);
-            win.WaveDrom.cm.setValue(str);
-            win.WaveDrom.cm.on('change', win.WaveDrom.cmChangeFunction);
-        }
+        coordloc = jsonEdit.getRangeInJsonString(str, /\s*,?\s*['"]?coord['"]?\s*:/g, 1, 0, 'obj');
+        str = jsonEdit.deleteElementFromJsonString(str, coordloc.beginIndex, coordloc.endIndex);
+        str = jsonEdit.insertElementInJsonString(str, coordloc.beginIndex, createCoordStr(index, parent));
+    }
+    else
+    {
+        fsmloc = jsonEdit.getRangeInJsonString(str, /\s*,?\s*['"]?fsm['"]?\s*:/g, 1, 0, 'arr');
+        str = jsonEdit.insertElementInJsonString(str, fsmloc.endIndex + 1, createCoordStr(index, parent));
+        dc.coordinates.found = true;
+    }
+    
+    input.value = str;
+    localStorage.waveform = str;
+    
+    if (win.WaveDrom && win.WaveDrom.cm && win.WaveDrom.cmChangeFunction)
+    {
+        win.WaveDrom.cm.off('change', win.WaveDrom.cmChangeFunction);
+        win.WaveDrom.cm.setValue(str);
+        win.WaveDrom.cm.on('change', win.WaveDrom.cmChangeFunction);
     }
 }
 
@@ -2213,7 +2208,7 @@ function createTransitions(index, parent, dc)
     
     function dragEndTrText(d)
     {
-        fsmJsonUpdate(index, parent, !isEmpty(dc.coordinates));
+        fsmJsonUpdate(index, parent, dc);
     }
     
     function enterTrText(d)
@@ -3029,8 +3024,8 @@ function defaultTransitionPoints(t, dc)
     
     t.p.pse0.x = start.ps.x;
     t.p.pse0.y = start.ps.y;
-    t.p.psh0.x = start.psh.x + ((!isEmpty(dc.coordinates) && start.psh.hasOwnProperty('x')) ? 0 : (angle ? start.ps.x - start.psi.x : 0));
-    t.p.psh0.y = start.psh.y + ((!isEmpty(dc.coordinates) && start.psh.hasOwnProperty('y')) ? 0 : (angle ? start.ps.y - start.psi.y : 0));
+    t.p.psh0.x = start.psh.x + ((dc.coordinates.found && start.psh.hasOwnProperty('x')) ? 0 : (angle ? start.ps.x - start.psi.x : 0));
+    t.p.psh0.y = start.psh.y + ((!dc.coordinates.found && start.psh.hasOwnProperty('y')) ? 0 : (angle ? start.ps.y - start.psi.y : 0));
     
     if (t.end.length > 1)
     {
@@ -3044,8 +3039,8 @@ function defaultTransitionPoints(t, dc)
     
     for (var es_i = 0; es_i < t.end.length; es_i++)
     {
-        t.p['peh' + es_i].x = end[es_i].peh.x + ((!isEmpty(dc.coordinates) && end[es_i].peh.hasOwnProperty('x')) ? 0 : (angle ? end[es_i].pea.x - end[es_i].pe.x : 0));
-        t.p['peh' + es_i].y = end[es_i].peh.y + ((!isEmpty(dc.coordinates) && end[es_i].peh.hasOwnProperty('y')) ? 0 : (angle ? end[es_i].pea.y - end[es_i].pe.y : 0));
+        t.p['peh' + es_i].x = end[es_i].peh.x + ((dc.coordinates.found && end[es_i].peh.hasOwnProperty('x')) ? 0 : (angle ? end[es_i].pea.x - end[es_i].pe.x : 0));
+        t.p['peh' + es_i].y = end[es_i].peh.y + ((dc.coordinates.found && end[es_i].peh.hasOwnProperty('y')) ? 0 : (angle ? end[es_i].pea.y - end[es_i].pe.y : 0));
         t.p['pea' + es_i].x = end[es_i].pea.x;
         t.p['pea' + es_i].y = end[es_i].pea.y;
         t.p['pee' + es_i].x = end[es_i].pe.x;
@@ -3451,7 +3446,7 @@ function createTrHandles(index, parent, dc, d3gtr)
     
     function dragEndHandle(d)
     {
-        fsmJsonUpdate(index, parent, !isEmpty(dc.coordinates));
+        fsmJsonUpdate(index, parent, dc);
     }
     
     function enterHandle (d)
@@ -3598,7 +3593,7 @@ function createNtHandles(index, parent, dc, d3gnt)
     
     function dragEndHandle(d)
     {
-        fsmJsonUpdate(index, parent, !isEmpty(dc.coordinates));
+        fsmJsonUpdate(index, parent, dc);
     }
     
     function enterHandle (d)
@@ -3782,7 +3777,7 @@ function createStates(index, parent, dc)
 
     function dragEndState(d)
     {
-        fsmJsonUpdate(index, parent, !isEmpty(dc.coordinates));
+        fsmJsonUpdate(index, parent, dc);
     }
     
     function clickState(d)
@@ -4190,7 +4185,7 @@ function createNotes(index, parent, dc)
     
     function dragEndNote(d)
     {
-        fsmJsonUpdate(index, parent, !isEmpty(dc.coordinates));
+        fsmJsonUpdate(index, parent, dc);
     }
     
     function clickNote(d)
@@ -4633,112 +4628,67 @@ function errMsg(svg, msg)
 
 }
 
-function putInCM(str, wintxt)
-{
-    var changefunc = (window.name == 'drom.editor.win.svg') ? ('cmSepChangeFunc') : ('cmChangeFunc');
-
-    wintxt.WaveDrom.cm.off('change', wintxt.WaveDrom[changefunc]);
+// function cropSVGToContent(index, parent)
+// {
+    // var d3svg = d3.select(parent).select('#svgcontent_' + index),
+        // d3g = d3.select(parent).select('#graph_' + index),
+        // extraspace = 20;
     
-    wintxt.WaveDrom.cm.setValue(str);
-    wintxt.document.getElementById('InputJSON_0').value = str;
-    localStorage.waveform = str;
-    
-    wintxt.WaveDrom.cm.on('change', wintxt.WaveDrom[changefunc]);
-}
-
-function cropSVGToContent(index, parent)
-{
-    var d3svg = d3.select(parent).select('#svgcontent_' + index),
-        d3g = d3.select(parent).select('#graph_' + index),
-        extraspace = 20;
-    
-    d3svg.each(function (d)
-    {
-        var t = d3g.node().getBBox();
-        
-        t.x -= extraspace;
-        t.y -= extraspace;
-        t.width += 2 * extraspace;
-        t.height += 2 * extraspace;
-        
-        d3.select(this)
-            .attr('width', t.width)
-            .attr('height', t.height)
-            .attr('viewBox', t.x + ' ' + t.y + ' ' + t.width + ' ' + t.height);
-    });
-}
-
-function readyFSMToSave(index, parent)
-{
-    // var winsvg = getWin('svg');
-    
-    if (!(d3.select(parent).select('#graph_' + index).empty()))
-    {
-        cropSVGToContent(index, parent);
-    }
-}
-
-function restoreSVGViewBox(index, parent)
-{
-    // var winsvg = getWin('svg');
-    
-    if (!(d3.select(parent).select('#graph_' + index).empty()))
-    {
-        resizeSVG(d3.select(parent).select('#svgcontent_' + index));
-    }
-}
-
-function createFSMBg(index, bg_id)
-{
-    var vb = d3.select('#svgcontent_' + index).attr('viewBox').split(' ');
-    
-    d3.select('#graph_' + index).insert('g','*:first-child')
-        .attr('id', bg_id)
-        .append('rect')
-            .attr('x', vb[0])
-            .attr('y', vb[1])
-            .attr('width', vb[2])
-            .attr('height', vb[3])
-            .style('fill', '#FFF');
-}
-
-function removeAllHandles(index, parent)
-{
-    // var winsvg = getWin('svg');
-    
-    d3.select(parent).select('#handles_' + index).remove();
-}
-
-function getWin(winsuffix)
-{
-    return window;
-    // var winname = 'drom.editor.win.';
-    
-    // if (window.name == (winname + 'tutorial'))
+    // d3svg.each(function (d)
     // {
-        // return;
-    // }
-    // else
+        // var t = d3g.node().getBBox();
+        
+        // t.x -= extraspace;
+        // t.y -= extraspace;
+        // t.width += 2 * extraspace;
+        // t.height += 2 * extraspace;
+        
+        // d3.select(this)
+            // .attr('width', t.width)
+            // .attr('height', t.height)
+            // .attr('viewBox', t.x + ' ' + t.y + ' ' + t.width + ' ' + t.height);
+    // });
+// }
+
+// function readyFSMToSave(index, parent)
+// {
+    // if (!(d3.select(parent).select('#graph_' + index).empty()))
     // {
-        // return (window.name == (winname + 'uni')) ? (window) : (window.open('', winname + winsuffix));
+        // cropSVGToContent(index, parent);
     // }
-}
+// }
 
-function isEmpty(obj)
-{
-    for(var prop in obj)
-    {
-        if (obj.hasOwnProperty(prop))
-            return false;
-    }
+// function restoreSVGViewBox(index, parent)
+// {
+    // if (!(d3.select(parent).select('#graph_' + index).empty()))
+    // {
+        // resizeSVG(d3.select(parent).select('#svgcontent_' + index));
+    // }
+// }
 
-    return JSON.stringify(obj) === JSON.stringify({});
-}
+// function createFSMBg(index, bg_id)
+// {
+    // var vb = d3.select('#svgcontent_' + index).attr('viewBox').split(' ');
+    
+    // d3.select('#graph_' + index).insert('g','*:first-child')
+        // .attr('id', bg_id)
+        // .append('rect')
+            // .attr('x', vb[0])
+            // .attr('y', vb[1])
+            // .attr('width', vb[2])
+            // .attr('height', vb[3])
+            // .style('fill', '#FFF');
+// }
 
-WaveDrom.createFSMBg = createFSMBg;
-WaveDrom.readyFSMToSave = readyFSMToSave;
-WaveDrom.restoreSVGViewBox = restoreSVGViewBox;
-WaveDrom.removeAllHandles = removeAllHandles;
+// function removeAllHandles(index, parent)
+// {
+    // d3.select(parent).select('#handles_' + index).remove();
+// }
+
+// WaveDrom.createFSMBg = createFSMBg;
+// WaveDrom.readyFSMToSave = readyFSMToSave;
+// WaveDrom.restoreSVGViewBox = restoreSVGViewBox;
+// WaveDrom.removeAllHandles = removeAllHandles;
 
 module.exports = renderFsm;
 
@@ -4765,11 +4715,11 @@ function resizeSVG(d)
         data.vb.height = display.offsetHeight - 1;
         data.vb.width = display.offsetWidth - 1;
         
-        adjustSVGsize(display/* , win */);
+        adjustSVGsize(display);
     }
 }
 
-function adjustSVGsize(display/* , win */)
+function adjustSVGsize(display)
 {
     d3.select(display)
         .selectAll('svg')
