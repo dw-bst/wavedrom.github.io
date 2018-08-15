@@ -93,6 +93,16 @@
         }
     }
 
+    function cmChangeFunction(cmm) {
+        function c () {
+            var v = cmm.getValue();
+            document.getElementById('InputJSON_0').value = v;
+            localStorage.waveform = v;
+            WaveDrom.EditorRefresh();
+        }
+        setTimeout(c, 750);
+    }
+    
     killBill();
 
     e = document.getElementById('InputJSON_0');
@@ -100,7 +110,7 @@
     nodeWebkit();
 
     e.value = val;
-
+    
     var cm = CodeMirror.fromTextArea(
         e,
         {
@@ -115,17 +125,10 @@
             autofocus: true
         }
     );
-    cm.on('change', function (cmm) {
-        function c () {
-            var v = cmm.getValue();
-            e.value = v;
-            localStorage.waveform = v;
-            WaveDrom.EditorRefresh();
-        }
-        setTimeout(c, 750);
-    });
-
+    cm.on('change', cmChangeFunction);
+    
     WaveDrom.cm = cm;
+    WaveDrom.cmChangeFunction = cmChangeFunction;
 
 })();
 
